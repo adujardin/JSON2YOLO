@@ -258,7 +258,8 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_k
 
     # Import json
     for json_file in sorted(Path(json_dir).resolve().glob('*.json')):
-        fn = Path(save_dir) / 'labels' / json_file.stem.replace('instances_', '')  # folder name
+        fn = json_file.stem.replace('person_keypoints_', '') if use_keypoints else json_file.stem.replace('instances_', '')
+        fn = Path(save_dir) / 'labels' / fn  # folder name
         fn.mkdir()
         with open(json_file) as f:
             data = json.load(f)
@@ -305,7 +306,7 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_k
                     if s not in segments:
                         segments.append(s)
                 if use_keypoints:
-                    k = np.array(ann['keypoints']).reshape(-1, 3)
+                    k = np.array(ann['keypoints'], dtype=np.float32).reshape(-1, 3)
                     k[:, 0::3] /= w
                     k[:, 1::3] /= h
                     keypoints.append(k.reshape(-1).tolist())
@@ -316,7 +317,7 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_k
                     line = segments[i] if use_segments else bboxes[i]  # cls, box or segments
                     if use_keypoints:
                         line += keypoints[i]
-                    file.write(('%g ' * len(line)).rstrip() % line + '\n')
+                    file.write(('%g ' * len(line)).rstrip() % tuple(line) + '\n')
 
 
 def min_index(arr1, arr2):
@@ -396,6 +397,7 @@ if __name__ == '__main__':
     if source == 'COCO':
         convert_coco_json('../datasets/coco/annotations',  # directory with *.json
                           use_segments=True,
+                          use_keypoints=False,
                           cls91to80=True)
 
     elif source == 'infolks':  # Infolks https://infolks.info/
