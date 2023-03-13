@@ -251,7 +251,8 @@ def convert_ath_json(json_dir):  # dir contains json annotations and images
 
 
 def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_keypoints=False, cls91to80=False):
-    assert not (use_segments and use_keypoints)
+    assert not (use_segments and use_keypoints), \
+            f"`use_segments={use_segments}` is incompatible with `use_keypoints={use_keypoints}`."
     save_dir = make_dirs()  # output directory
     coco80 = coco91_to_coco80_class()
 
