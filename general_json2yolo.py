@@ -250,7 +250,8 @@ def convert_ath_json(json_dir):  # dir contains json annotations and images
     print(f'Done. Output saved to {Path(dir).absolute()}')
 
 
-def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91to80=False):
+def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_keypoints=False, cls91to80=False):
+    assert not (use_segments and use_keypoints)
     save_dir = make_dirs()  # output directory
     coco80 = coco91_to_coco80_class()
 
@@ -275,6 +276,7 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91
 
             bboxes = []
             segments = []
+            keypoints = []
             for ann in anns:
                 if ann['iscrowd']:
                     continue
@@ -301,11 +303,18 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, cls91
                     s = [cls] + s
                     if s not in segments:
                         segments.append(s)
+                if use_keypoints:
+                    k = np.array(ann['keypoints']).reshape(-1, 3)
+                    k[:, 0::3] /= w
+                    k[:, 1::3] /= h
+                    keypoints.append(k.reshape(-1).tolist())
 
             # Write
             with open((fn / f).with_suffix('.txt'), 'a') as file:
                 for i in range(len(bboxes)):
-                    line = *(segments[i] if use_segments else bboxes[i]),  # cls, box or segments
+                    line = segments[i] if use_segments else bboxes[i]  # cls, box or segments
+                    if use_keypoints:
+                        line += keypoints[i]
                     file.write(('%g ' * len(line)).rstrip() % line + '\n')
 
 
