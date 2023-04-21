@@ -395,11 +395,15 @@ if __name__ == '__main__':
     source = 'COCO'
 
     if source == 'COCO':
-        convert_coco_json('../datasets/coco/annotations',  # directory with *.json
-                          use_segments=True,
-                          use_keypoints=False,
+        convert_coco_json('datasets/coco/annotations',  # directory with *.json
+                          use_segments=False,
+                          use_keypoints=True,
                           cls91to80=True)
-
+    if source == 'OCHUMAN':
+        convert_coco_json('datasets/ochuman/annotations',  # directory with *.json
+                          use_segments=False,
+                          use_keypoints=True,
+                          cls91to80=True)
     elif source == 'infolks':  # Infolks https://infolks.info/
         convert_infolks_json(name='out',
                              files='../data/sm4/json/*.json',
