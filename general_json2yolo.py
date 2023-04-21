@@ -259,6 +259,7 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_k
     # Import json
     for json_file in sorted(Path(json_dir).resolve().glob('*.json')):
         fn = json_file.stem.replace('person_keypoints_', '') if use_keypoints else json_file.stem.replace('instances_', '')
+        json_stem = fn
         fn = Path(save_dir) / 'labels' / fn  # folder name
         fn.mkdir()
         with open(json_file) as f:
@@ -318,6 +319,10 @@ def convert_coco_json(json_dir='../coco/annotations/', use_segments=False, use_k
                     if use_keypoints:
                         line += keypoints[i]
                     file.write(('%g ' * len(line)).rstrip() % tuple(line) + '\n')
+
+            # Write image file list
+            with open((Path(save_dir) / json_stem).with_suffix('.txt'), 'a') as file:
+                file.write(str(Path("images") / f) + '\n')
 
 
 def min_index(arr1, arr2):
@@ -392,7 +397,7 @@ def delete_dsstore(path='../datasets'):
 
 
 if __name__ == '__main__':
-    source = 'COCO'
+    source = 'OCHUMAN'
 
     if source == 'COCO':
         convert_coco_json('datasets/coco/annotations',  # directory with *.json
